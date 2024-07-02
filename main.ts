@@ -1,13 +1,10 @@
-let lineFollowerLeft: number = 0;
-let lineFollowerRight: number = 0;
+lineFollower.create(AnalogPin.P0, AnalogPin.P1);
+lineFollower.calibrate();
 
 basic.forever(function() {
 
-    lineFollowerLeft = pins.analogReadPin(AnalogPin.P0);
-    lineFollowerRight = pins.analogReadPin(AnalogPin.P1);
+    serial.writeLine("Sensor left: " + lineFollower.isOnLine(lineFollower.LineFollowerSensor.Left));
+    serial.writeLine("Sensor right: " + lineFollower.isOnLine(lineFollower.LineFollowerSensor.Right));
 
-    serial.writeLine("Left line value: " + lineFollowerLeft);
-    serial.writeLine("Right line value: " + lineFollowerRight);
-
-    pause(100);
+    pause(200);
 });

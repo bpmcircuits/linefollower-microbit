@@ -49,15 +49,31 @@ namespace lineFollower {
         return pins.analogReadPin(rightSensorPin);
     }
 
-    //% blockId=line_follower_is_on_line block="is on line"
+    //% blockId=line_follower_is_on_line block="is on line %sensor"
     //% weight=70
-    export function isOnLine(): boolean {
-        let leftValue = pins.analogReadPin(leftSensorPin);
-        let rightValue = pins.analogReadPin(rightSensorPin);
+    export function isOnLine(sensor: LineFollowerSensor): boolean {
+        let sensorValue: number;
+        let whiteValue: number;
+        let blackValue: number;
 
-        let leftOnLine = (leftValue > whiteLeft && leftValue < blackLeft);
-        let rightOnLine = (rightValue > whiteRight && rightValue < blackRight);
+        if (sensor === LineFollowerSensor.Left) {
+            sensorValue = pins.analogReadPin(leftSensorPin);
+            whiteValue = whiteLeft;
+            blackValue = blackLeft;
+        } else {
+            sensorValue = pins.analogReadPin(rightSensorPin);
+            whiteValue = whiteRight;
+            blackValue = blackRight;
+        }
 
-        return leftOnLine || rightOnLine;
+        return (sensorValue > whiteValue && sensorValue < blackValue);
+    }
+
+    // Enum for sensors
+    export enum LineFollowerSensor {
+        //% block="left"
+        Left,
+        //% block="right"
+        Right
     }
 }
