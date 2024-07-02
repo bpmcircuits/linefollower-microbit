@@ -8,6 +8,10 @@ namespace lineFollower {
     let whiteRight: number;
     let blackRight: number;
 
+    let leftSensorValue: number = 0;
+    let rightSensorValue: number = 0;
+    const ALPHA = 0.5; // Współczynnik wygładzania (między 0 a 1)
+
     //% blockId=line_follower_create block="create line follower with left sensor at %leftPin|and right sensor at %rightPin"
     //% weight=100 blockSetVariable=lineFollower
     export function create(leftPin: AnalogPin, rightPin: AnalogPin): void {
@@ -23,16 +27,16 @@ namespace lineFollower {
             basic.pause(100);
         }
 
-        whiteLeft = pins.analogReadPin(leftSensorPin);
-        whiteRight = pins.analogReadPin(rightSensorPin);
+        whiteLeft = getFilteredReading(leftSensorPin, true);
+        whiteRight = getFilteredReading(rightSensorPin, true);
 
         basic.showString("B");
         while (!input.buttonIsPressed(Button.B)) {
             basic.pause(100);
         }
 
-        blackLeft = pins.analogReadPin(leftSensorPin);
-        blackRight = pins.analogReadPin(rightSensorPin);
+        blackLeft = getFilteredReading(leftSensorPin, true);
+        blackRight = getFilteredReading(rightSensorPin, true);
 
         basic.showIcon(IconNames.Yes);
     }
@@ -40,13 +44,13 @@ namespace lineFollower {
     //% blockId=line_follower_read_left block="read left sensor"
     //% weight=80
     export function readLeftSensor(): number {
-        return pins.analogReadPin(leftSensorPin);
+        return Math.round(getFilteredReading(leftSensorPin, false));
     }
 
     //% blockId=line_follower_read_right block="read right sensor"
     //% weight=80
     export function readRightSensor(): number {
-        return pins.analogReadPin(rightSensorPin);
+        return Math.round(getFilteredReading(rightSensorPin, false));
     }
 
     //% blockId=line_follower_is_on_line block="is on line %sensor"
@@ -57,16 +61,36 @@ namespace lineFollower {
         let blackValue: number;
 
         if (sensor === LineFollowerSensor.Left) {
-            sensorValue = pins.analogReadPin(leftSensorPin);
+            sensorValue = Math.round(getFilteredReading(leftSensorPin, false));
             whiteValue = whiteLeft;
             blackValue = blackLeft;
         } else {
-            sensorValue = pins.analogReadPin(rightSensorPin);
+            sensorValue = Math.round(getFilteredReading(rightSensorPin, false));
             whiteValue = whiteRight;
             blackValue = blackRight;
         }
 
         return (sensorValue > whiteValue && sensorValue < blackValue);
+    }
+
+    function getFilteredReading(pin: AnalogPin, isCalibration: boolean): number {
+        let currentValue = pins.analogReadPin(pin);
+
+        if (pin === leftSensorPin) {
+            if (isCalibration) {
+                leftSensorValue = currentValue;
+            } else {
+                leftSensorValue = ALPHA * currentValue + (1 - ALPHA) * leftSensorValue;
+            }
+            return leftSensorValue;
+        } else {
+            if (isCalibration) {
+                rightSensorValue = currentValue;
+            } else {
+                rightSensorValue = ALPHA * currentValue + (1 - ALPHA) * rightSensorValue;
+            }
+            return rightSensorValue;
+        }
     }
 
     // Enum for sensors

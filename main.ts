@@ -3,8 +3,8 @@ lineFollower.calibrate();
 
 basic.forever(function() {
 
-    serial.writeLine("Sensor left: " + lineFollower.isOnLine(lineFollower.LineFollowerSensor.Left));
-    serial.writeLine("Sensor right: " + lineFollower.isOnLine(lineFollower.LineFollowerSensor.Right));
+    serial.writeLine("Sensor left: " + lineFollower.readLeftSensor());
+    serial.writeLine("Sensor right: " + lineFollower.readRightSensor());
 
-    pause(200);
+    pause(100);
 });
